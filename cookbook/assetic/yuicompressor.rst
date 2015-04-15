@@ -1,25 +1,31 @@
 .. index::
    single: Assetic; YUI Compressor
 
-Comment minifier les JavaScripts et les feuilles de style avec YUI Compressor
+Comment minifier les JavaScripts et les feuilles de style avec YUI Compressor et Google Closure
 =============================================================================
 
 Yahoo! fournit un excellent utilitaire pour minifier les JavaScripts et les
-feuilles de style pour qu'elles soient plus rapides à charger, `YUI Compressor`_.
-Grâce à Assetic, vous pourrez tirer profit de cet outil très facilement.
+feuilles de style pour qu'elles soient plus rapides à charger, `YUI Compressor`_ et `Google Closure`.
+Grâce à Assetic, vous pourrez tirer profit de ces outils très facilement.
 
 Téléchargez le JAR YUI Compressor
 ---------------------------------
 
-YUI Compressor est écrit en Java est distribué sous forme de JAR. `Téléchargez le JAR`_
-sur le site de Yahoo! et enregistrez le sous ``app/Resources/java/yuicompressor.jar``.
+YUI Compressor est écrit en Java est distribué sous forme de JAR. `Téléchargez yuicompressor-2.4.8.jar`_
+sur le site de Yahoo! et enregistrez le sous ``app/Resources/java/yuicompressor-2.4.8.jar``.
 
-Configurez les filtres YUI
+Téléchargez le JAR Google Closure
+---------------------------------
+
+Google Closure est aussi écrit en Java est distribué sous forme de JAR. `Téléchargez compiler.jar`_
+sur Google Developers enregistrez le sous ``app/Resources/java/compiler.jar``.
+
+Configurez les filtres YUI et Google Closure
 --------------------------
 
 Maintenant vous devez configurer les deux filtres Assetic dans votre application,
-l'un pour minifier les JavaScripts avec YUI Compressor et l'autre pour minifier
-les feuilles de style :
+l'un pour minifier les JavaScripts avec Closure et l'autre pour minifier
+les feuilles de style avec YUI Compressor :
 
 .. configuration-block::
 
@@ -29,10 +35,11 @@ les feuilles de style :
         assetic:
             # java: "/usr/bin/java"
             filters:
-                yui_css:
-                    jar: "%kernel.root_dir%/Resources/java/yuicompressor.jar"
-                yui_js:
-                    jar: "%kernel.root_dir%/Resources/java/yuicompressor.jar"
+                cssrewrite: ~
+            closure:
+               jar: "%kernel.root_dir%/Resources/java/compiler.jar"
+            yui_css:
+               jar: "%kernel.root_dir%/Resources/java/yuicompressor-2.4.8.jar"
 
     .. code-block:: xml
 
@@ -68,7 +75,7 @@ les feuilles de style :
     ``C:\Program Files (x86)\Java\jre6\bin\java.exe`` par défaut
     
 Vous avez maintenant accès aux deux nouveaux filtres Assetic dans votre
-application : ``yui_css`` et ``yui_js``. Ils utiliseront YUI Compressor
+application : ``yui_css`` et ``closure``. Ils utiliseront YUI Compressor et Google Closure Tools
 pour minifier respectivement les feuilles de style et les JavaScripts.
 
 Minifiez vos Ressources
@@ -82,7 +89,7 @@ partie de la couche Vue, ce travail doit être fait dans vos templates :
 
     .. code-block:: html+jinja
 
-        {% javascripts '@AcmeFooBundle/Resources/public/js/*' filter='yui_js' %}
+        {% javascripts '@AcmeFooBundle/Resources/public/js/*' filter='closure' %}
             <script src="{{ asset_url }}"></script>
         {% endjavascripts %}
 
@@ -90,7 +97,7 @@ partie de la couche Vue, ce travail doit être fait dans vos templates :
 
         <?php foreach ($view['assetic']->javascripts(
             array('@AcmeFooBundle/Resources/public/js/*'),
-            array('yui_js')
+            array('closure')
         ) as $url): ?>
             <script src="<?php echo $view->escape($url) ?>"></script>
         <?php endforeach; ?>
@@ -137,7 +144,7 @@ n'est pas actif.
 
     .. code-block:: html+jinja
 
-        {% javascripts '@AcmeFooBundle/Resources/public/js/*' filter='?yui_js' %}
+        {% javascripts '@AcmeFooBundle/Resources/public/js/*' filter='?closure' %}
             <script src="{{ asset_url }}"></script>
         {% endjavascripts %}
 
@@ -145,7 +152,7 @@ n'est pas actif.
 
         <?php foreach ($view['assetic']->javascripts(
             array('@AcmeFooBundle/Resources/public/js/*'),
-            array('?yui_js')
+            array('?closure')
         ) as $url): ?>
             <script src="<?php echo $view->escape($url) ?>"></script>
         <?php endforeach; ?>
@@ -154,11 +161,13 @@ n'est pas actif.
     
     Plutôt que d'ajouter le filtre à vos balises assets, vous pouvez aussi
     l'activer de façon globale en ajoutant l'attribut apply-to à la configuration
-    du filtre, par exemple ``apply_to: "\.js$"`` pour le filtre yui_js.
+    du filtre, par exemple ``apply_to: "\.js$"`` pour le filtre closure.
     Pour que le filtre ne s'applique qu'en production, ajoutez le au fichier
     config_prod au lieu du fichier de configuration commun. Pour plus de détails
     sur comment appliquer des filtres en fonction des extensions de fichiers, lisez
     :ref:`cookbook-assetic-apply-to`.
 
-.. _`YUI Compressor`: http://developer.yahoo.com/yui/compressor/
-.. _`Téléchargez le JAR`: http://yuilibrary.com/projects/yuicompressor/
+.. _`YUI Compressor`: https://developers.google.com/closure/compiler/
+.. _`Google Closure`: http://yui.github.io/yuicompressor/
+.. _`Téléchargez yuicompressor-2.4.8.jar`: https://github.com/yui/yuicompressor/releases
+.. _`Téléchargez compiler.jar: http://dl.google.com/closure-compiler/compiler-latest.zip
